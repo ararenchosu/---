@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 *.pyo
+# この2行を追加
+.env
+bot_config.json
