@@ -28,3 +28,6 @@
   "sales_file": "tsum_sales.json",
   "free_used_file": "tsum_free_used.json"
 }
+# この2行を追加
+.env
+bot_config.json
