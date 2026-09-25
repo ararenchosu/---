@@ -5,30 +5,49 @@ except Exception:
     pass
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv  # 追加
 import unicodedata
 import requests
-
 import tsum_login
 import line_password_login
 import tsum
 import tsum_guest
 from tsum_forge import Forge
 
+# .env 読み込み（ローカル開発用）
+load_dotenv()
+
 _cfg_name = os.environ.get("TSUM_BOT_CONFIG", "bot_config.json")
 CONFIG_FILE = _cfg_name if os.path.isabs(_cfg_name) else os.path.join(HERE, _cfg_name)
 print(f"[bot] 設定ファイル: {os.path.basename(CONFIG_FILE)}")
+
 CREDS_FILE = os.path.join(HERE, "line_credentials.json")
 TOKENS_FILE = os.path.join(HERE, "line_tokens_latest.json")
 SESSION_FILE = os.path.join(HERE, "tsum_session_headless.json")
 
 def load_config():
+    # 1. まず環境変数から取得を試みる（最優先・安全）
+    env_token = os.environ.get("DISCORD_TOKEN")
+    env_prefix = os.environ.get("BOT_PREFIX", "!")
+
+    if env_token:
+        print("[bot] 環境変数からトークンを読み込みました ✅")
+        return {
+            "token": env_token,
+            "prefix": env_prefix
+        }
+
+    # 2. 環境変数が無い場合に限りJSONファイルから読み込み（旧来方式・フォールバック）
     if not os.path.exists(CONFIG_FILE):
-        print(f"[bot] {CONFIG_FILE} がありません。下記の内容で作成してください:")
+        print(f"[bot] 環境変数 DISCORD_TOKEN が設定されておらず、{CONFIG_FILE} も存在しません。")
+        print("[bot] 推奨: 環境変数(DISCORD_TOKEN)にトークンを設定してください。")
+        print("[bot] 代替: 下記内容でファイルを作成することもできます（非推奨）:")
         print('{\n  "token": "あなたのBOTトークン",\n  "prefix": "!"\n}')
         sys.exit(1)
+
+    print(f"[bot] {CONFIG_FILE} から読み込みました（環境変数を推奨）")
     return json.load(open(CONFIG_FILE, encoding="utf-8"))
 
 CONFIG = load_config()
